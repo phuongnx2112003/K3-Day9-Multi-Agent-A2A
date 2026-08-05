@@ -2,6 +2,7 @@
 Tracing and logging infrastructure.
 """
 import json
+import platform
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -78,7 +79,9 @@ def write_metadata(commit_sha: Optional[str] = None) -> None:
     metadata = {
         "model_name": MODEL_NAME,
         "parameter_size": PARAMETER_SIZE,
+        "provider": "OpenAI API",
         "framework": FRAMEWORK,
+        "runtime": f"Python {platform.python_version()}",
         "policy_version": POLICY_VERSION,
         "schema_version": SCHEMA_VERSION,
         "executed_at": datetime.now(timezone.utc).isoformat(),

@@ -77,3 +77,56 @@ async def test_verifier_financial_and_status_mismatch():
     res = await verifier.verify(req)
     assert res.valid is False
     assert len(res.errors) >= 1
+
+
+@pytest.mark.asyncio
+async def test_verifier_rejects_ungrounded_evidence():
+    verifier = VerifierAgent()
+    invalid_draft = MOCK_RESOLUTION_DRAFT.model_copy(
+        update={
+            "evidence_ids": [
+                *MOCK_RESOLUTION_DRAFT.evidence_ids,
+                f"payment:{MOCK_ORDER_ID}:999",
+            ]
+        }
+    )
+    req = VerificationRequest(
+        case_id=MOCK_CASE_ID,
+        draft=invalid_draft,
+        order_seller_facts=MOCK_ORDER_SELLER_FACTS,
+        payment_facts=MOCK_PAYMENT_FACTS,
+        delivery_facts=MOCK_DELIVERY_FACTS,
+    )
+
+    res = await verifier.verify(req)
+
+    assert res.valid is False
+    assert any("not grounded" in error for error in res.errors)
+
+
+@pytest.mark.asyncio
+async def test_verifier_rejects_policy_decision_mismatch():
+    verifier = VerifierAgent()
+    invalid_draft = MOCK_RESOLUTION_DRAFT.model_copy(
+        update={
+            "primary_issue": "late_delivery_logistics",
+            "responsible_parties": [
+                {
+                    "party_type": "logistics_provider",
+                    "party_id": "LOGISTICS_PROVIDER",
+                }
+            ],
+        }
+    )
+    req = VerificationRequest(
+        case_id=MOCK_CASE_ID,
+        draft=invalid_draft,
+        order_seller_facts=MOCK_ORDER_SELLER_FACTS,
+        payment_facts=MOCK_PAYMENT_FACTS,
+        delivery_facts=MOCK_DELIVERY_FACTS,
+    )
+
+    res = await verifier.verify(req)
+
+    assert res.valid is False
+    assert any("primary_issue does not match" in error for error in res.errors)

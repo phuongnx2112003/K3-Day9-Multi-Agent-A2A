@@ -46,7 +46,7 @@ Output của phần này được bàn giao cho:
 | Điều tra order và seller | `OrderSellerAgent.process` | Item/seller facts, item total, freight total, seller late handoff và evidence candidates | `pytest tests/test_order_seller.py` |
 | Điều tra delivery | `DeliveryAgent.process` | Mốc carrier/customer/estimate và hai cờ `delivered_late`, `delivered_within_estimate` | `pytest tests/test_delivery.py` |
 | Kiểm tra các edge case | Bộ test Thành viên 1 | 13/13 behavioral tests đạt | Lệnh pytest theo module |
-| Regression toàn repo | Thư mục `tests/` | 25/25 tests đạt tại thời điểm xác minh | `python -m pytest -q` |
+| Regression toàn repo | Thư mục `tests/` | 42 tests đạt, 1 API test được skip khi không có key | `python -m pytest -q` |
 | Kiểm tra 50 input thật | `input/EC_001.json` đến `EC_050.json` | 34 delivered, 8 canceled, 8 unavailable; 16 giao trễ, 9 seller handoff trễ và 8 order không có item | Script read-only gọi hai agent cho 50 case |
 
 Một output cụ thể của phần việc là `OrderSellerFacts` cho mỗi order. Artifact này chứa toàn bộ item theo đúng thứ tự `order_item_id`, seller liên quan, tổng tiền hàng, tổng freight, cờ handoff trễ theo item/seller và evidence ID có thể dựng trực tiếp từ CSV. Cùng với `DeliveryFacts`, đây là đầu vào đã kiểm chứng để Policy Agent phân biệt `late_delivery_seller`, `late_delivery_logistics` và `unsupported_late_claim`.
@@ -85,7 +85,7 @@ python -m compileall -q src tests run.py
 ```
 
 - **Kết quả mong đợi:** 13 test phần Thành viên 1 và toàn bộ test repo đều đạt; source compile thành công.
-- **Kết quả thực tế:** `13 passed` cho ba module sở hữu và `25 passed` cho toàn repo tại thời điểm xác minh.
+- **Kết quả thực tế:** `13 passed` cho ba module sở hữu. Live OpenAI API test được skip khi môi trường không có `OPENAI_API_KEY`; các test còn lại không cần secret.
 - **Artifact:** `tests/member1_fixtures.py` và ba file behavioral test; không chứa secret.
 
 Kiểm tra bổ sung đã load dataset thật và gọi song song `OrderSellerAgent`, `DeliveryAgent` cho đủ 50 input. Kết quả thực tế là `validated_cases=50`, không có exception.

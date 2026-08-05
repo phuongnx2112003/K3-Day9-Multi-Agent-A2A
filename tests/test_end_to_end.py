@@ -16,6 +16,11 @@ from src.agents.verifier import VerifierAgent
 from src.agents.coordinator import CoordinatorAgent
 
 
+@pytest.fixture(autouse=True)
+def isolate_trace(monkeypatch):
+    monkeypatch.setattr("src.agents.coordinator.log_event", lambda *args, **kwargs: None)
+
+
 @pytest.fixture(scope="module")
 def dal():
     dal_instance = DataAccessLayer()

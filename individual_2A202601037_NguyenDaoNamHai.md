@@ -19,7 +19,7 @@
 | Contracts & Schemas | `src/contracts/messages.py`<br>`src/contracts/output_schema.py`<br>`src/contracts/fixtures.py` | Đề bài & Quy tắc Handoff | Pydantic Models & Mock Fixtures dùng chung cho cả nhóm | Hoàn thành |
 | Verifier Agent (Quality Gate) | `src/agents/verifier.py` | `VerificationRequest`, `ResolutionDraft`, Facts, DAL | `VerificationResult` (Kiểm tra Schema, Decimal Totals, Status/Refund consistency & Grounded Evidence) | Hoàn thành |
 | Coordinator Agent (Orchestration) | `src/agents/coordinator.py` | `CaseInput` từ Batch Runner | Async Fan-out (OrderSeller, Payment, Delivery), Policy Call, Verifier Gate & Per-Agent Tracing | Hoàn thành |
-| Batch Runner & Observability | `run.py`<br>`src/tracing.py`<br>`src/settings.py`<br>`src/llm_client.py` | 50 file `input/EC_xxx.json` | 50 output JSON, `trace.jsonl`, `metadata.json` (dynamic commit SHA), Groq LLM Client & `submission_output.zip` | Hoàn thành |
+| Batch Runner & Observability | `run.py`<br>`src/tracing.py`<br>`src/settings.py`<br>`src/llm_client.py` | 50 file `input/EC_xxx.json` | 50 output JSON, `trace.jsonl`, `metadata.json` (dynamic commit SHA), OpenAI LLM Client & `submission_output.zip` | Hoàn thành |
 | Unit & Integration Tests | `tests/test_contracts.py`<br>`tests/test_verifier.py`<br>`tests/test_end_to_end.py`<br>`tests/test_llm_client.py` | Mock data & Real Data Pipeline | Bộ test kiểm thử tự động 36/36 tests PASSED | Hoàn thành |
 
 ### Việc hỗ trợ ngoài phạm vi chính
@@ -27,7 +27,7 @@
 | Hoạt động | Thành viên/module được hỗ trợ | Kết quả |
 |---|---|---|
 | Thiết kế Handoff Contracts & Fixtures | Thành viên 1 & Thành viên 2 | Cung cấp sẵn mock data giúp TV1 & TV2 viết test độc lập ngay từ Giai đoạn 0 |
-| Khởi tạo LLM Client & Cấu hình Groq | Toàn nhóm | Đóng gói `src/llm_client.py` tích hợp Groq API (`llama-3.1-8b-instant`), cài đặt `.env` mẫu an toàn |
+| Khởi tạo LLM Client & cấu hình OpenAI | Toàn nhóm | Đóng gói `src/llm_client.py` tích hợp OpenAI API (`gpt-4o-mini`), cài đặt `.env` mẫu an toàn |
 
 ## 3. Kết quả theo vai trò
 
@@ -36,7 +36,7 @@
 | Khóa Handoff Contracts | `src/contracts/messages.py` | Pydantic Schemas | `pytest tests/test_contracts.py` |
 | Triển khai Quality Gate Verifier | `src/agents/verifier.py` | Quality Gate kiểm tra 7 lớp quy tắc | `pytest tests/test_verifier.py` |
 | Triển khai Orchestrator Coordinator | `src/agents/coordinator.py` | Async Fan-out & Granular Agent Tracing | `pytest tests/test_end_to_end.py` |
-| Triển khai LLM Client | `src/llm_client.py` | Kết nối Groq API cho `llama-3.1-8b-instant` | `pytest tests/test_llm_client.py` |
+| Triển khai LLM Client | `src/llm_client.py` | Kết nối OpenAI API cho `gpt-4o-mini` | `pytest tests/test_llm_client.py` |
 | Triển khai Batch Runner & Submission Zip | `run.py` | Cô lập lỗi từng case, tạo 50 JSON & ZIP chứa đúng 50 file | `python run.py` |
 
 ## 4. Giải thích phần kỹ thuật đã thực hiện
