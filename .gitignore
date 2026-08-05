@@ -1,6 +1,22 @@
+venv/
 .venv/
 __pycache__/
 *.pyc
+*.py[cod]
+*.egg-info/
 .pytest_cache/
-*.zip
+.coverage
+htmlcov/
+
 .env
+output/*.json
+!output/.gitkeep
+logging/trace.jsonl
+
+# Local tooling
+.idea/
+.vscode/
+
+# Generated submission artifacts
+*.zip
+output/*.tmp

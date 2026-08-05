@@ -1,5 +1,31 @@
 # K3 Day 09 - Multi-Agent E-commerce Dispute Resolution
 
+## Cài đặt môi trường
+
+Yêu cầu Python 3.12 trở lên. Từ thư mục root của repo, chạy:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m pytest -q
+```
+
+Nếu sử dụng provider cần API key, tạo file local từ mẫu và điền secret vào `.env`:
+
+```bash
+cp .env.example .env
+```
+
+Không commit `.env`. Tên model phải được khai báo trực tiếp trong `src/settings.py` theo yêu cầu chấm bài. Chạy pipeline bằng:
+
+```bash
+python run.py
+```
+
+Chỉ chạy pipeline sau khi các agent đã được triển khai đầy đủ; scaffold ban đầu có thể tạo kết quả placeholder.
+
 ## 1. Bài toán
 
 Xây dựng một hệ thống multi-agent để điều tra 50 yêu cầu hỗ trợ của khách hàng trên dữ liệu Olist. Với mỗi case, hệ thống phải đối chiếu nhiều nguồn dữ liệu, xác định vấn đề, bên chịu trách nhiệm, bằng chứng, khoản hoàn đề xuất và hành động xử lý.
