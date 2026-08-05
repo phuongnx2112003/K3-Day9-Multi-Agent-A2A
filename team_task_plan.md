@@ -494,5 +494,5 @@ Bài lab chỉ được xem là hoàn thành khi:
 - [x] Mỗi case có terminal event trong trace.
 - [ ] Model được khai báo trong source và có tối đa 10B parameters.
 - [x] Không commit `.env`, API key hoặc secret.
-- [ ] Source code đã được commit trước khi tạo submission zip.
+- [x] Source code đã được commit trước khi tạo submission zip.
 - [x] `architecture.md` và kế hoạch này phản ánh đúng implementation cuối cùng.
