@@ -6,7 +6,7 @@
 | --------------- | ------------------------- |
 | Họ và tên       | Nguyễn Đào Nam Hải        |
 | MSSV            | 2A202601037               |
-| 5 số cuối MHV   | 01037 / 1037              |
+| 5 số cuối MHV   | 01037                     |
 | Khóa/Lớp        | K3                        |
 | Vai trò chính   | Thành viên 3 (Coordinator, Verifier, Batch Runner & Observability) |
 | Ngày hoàn thành | 2026-08-05                |

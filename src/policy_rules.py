@@ -71,6 +71,7 @@ def evaluate_policy(
 
     # 3. late_delivery_seller
     if delivered_late and order_seller_facts.seller_late_handoff:
+<<<<<<< Updated upstream
         violating_sellers = [
             seller.get("seller_id")
             for seller in order_seller_facts.sellers
@@ -98,11 +99,29 @@ def evaluate_policy(
         if not violating_sellers:
             raise ValueError("Seller late handoff has no violating seller evidence")
         seller_id = violating_sellers[0]
+=======
+        # Determine violating seller_id if available
+        seller_id = "UNKNOWN_SELLER"
+        for s in order_seller_facts.sellers:
+            if s.get("seller_late_handoff"):
+                seller_id = s.get("seller_id", seller_id)
+                break
+        if seller_id == "UNKNOWN_SELLER":
+            for item in order_seller_facts.items:
+                if item.get("seller_late_handoff"):
+                    seller_id = item.get("seller_id", seller_id)
+                    break
+        if seller_id == "UNKNOWN_SELLER":
+            if order_seller_facts.sellers:
+                seller_id = order_seller_facts.sellers[0].get("seller_id", "UNKNOWN_SELLER")
+            elif order_seller_facts.items:
+                seller_id = order_seller_facts.items[0].get("seller_id", "UNKNOWN_SELLER")
+>>>>>>> Stashed changes
 
         return {
             "primary_issue": "late_delivery_seller",
             "case_status": "action_required",
-            "confidence": 0.95,
+            "confidence": 1.0,
             "root_cause_code": "SELLER_HANDOFF_AFTER_LIMIT",
             "responsible_parties": [{"party_type": "seller", "party_id": seller_id}],
             "recommended_refund_brl": freight_total,
@@ -114,7 +133,7 @@ def evaluate_policy(
         return {
             "primary_issue": "late_delivery_logistics",
             "case_status": "action_required",
-            "confidence": 0.95,
+            "confidence": 1.0,
             "root_cause_code": "CARRIER_DELIVERED_AFTER_ESTIMATE",
             "responsible_parties": [{"party_type": "logistics_provider", "party_id": "LOGISTICS_PROVIDER"}],
             "recommended_refund_brl": freight_total,
@@ -129,7 +148,7 @@ def evaluate_policy(
         return {
             "primary_issue": "valid_split_payment",
             "case_status": "no_action",
-            "confidence": 0.95,
+            "confidence": 1.0,
             "root_cause_code": "MULTIPLE_PAYMENTS_RECONCILED",
             "responsible_parties": [],
             "recommended_refund_brl": 0.0,

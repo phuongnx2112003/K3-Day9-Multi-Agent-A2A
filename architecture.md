@@ -382,12 +382,14 @@ Không retry lỗi nghiệp vụ deterministic vì chạy lại sẽ không thay
 │   ├── policy_rules.py
 │   ├── evidence.py
 │   ├── tracing.py
+│   ├── llm_client.py
 │   └── settings.py
 ├── tests/
 │   ├── test_data_access.py
 │   ├── test_policy_rules.py
 │   ├── test_evidence.py
 │   ├── test_verifier.py
+│   ├── test_llm_client.py
 │   └── test_end_to_end.py
 ├── logging/
 │   ├── trace.jsonl
