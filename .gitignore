@@ -1,0 +1,19 @@
+# Local environment and secrets
+.venv/
+.env
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local tooling
+.idea/
+.vscode/
+
+# Generated submission artifacts
+*.zip
+output/*.tmp
