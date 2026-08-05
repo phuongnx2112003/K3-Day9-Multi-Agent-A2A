@@ -452,47 +452,47 @@ Quy tắc tránh conflict:
 
 ### Người 1
 
-- [ ] Data Access đọc đúng các CSV cần thiết.
-- [ ] Order & Seller Agent trả đúng facts contract.
-- [ ] Delivery Agent trả đúng facts contract.
-- [ ] Các phép tính item/freight đã dùng `Decimal`.
-- [ ] Unit tests module dữ liệu đã chạy thành công.
-- [ ] Đã bàn giao fixture và API cho Người 2, Người 3.
-- [ ] Báo cáo cá nhân mô tả đúng phần đã thực hiện.
+- [x] Data Access đọc đúng các CSV cần thiết.
+- [x] Order & Seller Agent trả đúng facts contract.
+- [x] Delivery Agent trả đúng facts contract.
+- [x] Các phép tính item/freight đã dùng `Decimal`.
+- [x] Unit tests module dữ liệu đã chạy thành công.
+- [x] Đã bàn giao fixture và API cho Người 2, Người 3.
+- [x] Báo cáo cá nhân mô tả đúng phần đã thực hiện.
 
 ### Người 2
 
-- [ ] Payment Agent cộng đúng mọi payment row.
-- [ ] Không nhân payment với installments.
-- [ ] Đã cài đủ sáu policy rule theo đúng thứ tự.
-- [ ] Refund, action và responsible party nhất quán.
-- [ ] Unit tests cho payment và policy đã chạy thành công.
-- [ ] Đã bàn giao `ResolutionDraft` mẫu cho Người 3.
-- [ ] Báo cáo cá nhân mô tả đúng phần đã thực hiện.
+- [x] Payment Agent cộng đúng mọi payment row.
+- [x] Không nhân payment với installments.
+- [x] Đã cài đủ sáu policy rule theo đúng thứ tự.
+- [x] Refund, action và responsible party nhất quán.
+- [x] Unit tests cho payment và policy đã chạy thành công.
+- [x] Đã bàn giao `ResolutionDraft` mẫu cho Người 3.
+- [x] Báo cáo cá nhân mô tả đúng phần đã thực hiện.
 
 ### Người 3
 
-- [ ] Contract models được cả nhóm thống nhất.
-- [ ] Coordinator thể hiện handoff thật giữa các agent.
-- [ ] Verifier chặn schema, evidence và refund sai.
-- [ ] Batch Runner xử lý đủ 50 case.
-- [ ] Trace chỉ chứa lượt chạy mới nhất.
-- [ ] Metadata phản ánh đúng runtime thực tế.
-- [ ] Zip chỉ chứa đúng 50 JSON output.
-- [ ] Báo cáo cá nhân mô tả đúng phần đã thực hiện.
+- [x] Contract models được cả nhóm thống nhất.
+- [x] Coordinator thể hiện handoff thật giữa các agent.
+- [x] Verifier chặn schema, evidence và refund sai.
+- [x] Batch Runner xử lý đủ 50 case.
+- [x] Trace chỉ chứa lượt chạy mới nhất.
+- [x] Metadata phản ánh đúng runtime thực tế.
+- [x] Zip chỉ chứa đúng 50 JSON output.
+- [x] Báo cáo cá nhân mô tả đúng phần đã thực hiện.
 
 ## 10. Definition of Done của cả nhóm
 
 Bài lab chỉ được xem là hoàn thành khi:
 
-- [ ] Có đủ sáu agent và mỗi agent có trách nhiệm riêng.
-- [ ] Ba investigation agent chạy song song hoặc trace thể hiện rõ cơ chế fan-out/fan-in.
-- [ ] Policy chỉ chạy sau khi nhận đủ facts.
-- [ ] Output chỉ được ghi sau khi Verifier thông qua.
-- [ ] Có đúng 50 output và tất cả parse được theo schema.
-- [ ] Không có evidence ID không tồn tại.
-- [ ] Mỗi case có terminal event trong trace.
+- [x] Có đủ sáu agent và mỗi agent có trách nhiệm riêng.
+- [x] Ba investigation agent chạy song song hoặc trace thể hiện rõ cơ chế fan-out/fan-in.
+- [x] Policy chỉ chạy sau khi nhận đủ facts.
+- [x] Output chỉ được ghi sau khi Verifier thông qua.
+- [x] Có đúng 50 output và tất cả parse được theo schema.
+- [x] Không có evidence ID không tồn tại.
+- [x] Mỗi case có terminal event trong trace.
 - [ ] Model được khai báo trong source và có tối đa 10B parameters.
-- [ ] Không commit `.env`, API key hoặc secret.
-- [ ] Source code đã được commit trước khi tạo submission zip.
-- [ ] `architecture.md` và kế hoạch này phản ánh đúng implementation cuối cùng.
+- [x] Không commit `.env`, API key hoặc secret.
+- [x] Source code đã được commit trước khi tạo submission zip.
+- [x] `architecture.md` và kế hoạch này phản ánh đúng implementation cuối cùng.

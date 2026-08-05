@@ -1,9 +1,11 @@
 {
-  "model_name": "qwen2.5:7b-instruct",
-  "parameter_size": "7B",
+  "model_name": "gpt-4o-mini",
+  "parameter_size": "Not publicly disclosed",
+  "provider": "OpenAI API",
   "framework": "Custom Multi-Agent (Python)",
+  "runtime": "Python 3.12.3",
   "policy_version": "EC_POLICY_V1",
   "schema_version": "1.0",
-  "executed_at": "2026-08-05T03:31:38.284417+00:00",
-  "commit_sha": "main"
+  "executed_at": "2026-08-05T04:27:18.183011+00:00",
+  "commit_sha": "dc0c559eb647a54c8a2b99d5d69ae2bf9d221f98"
 }

@@ -2,14 +2,21 @@
 Unit tests for Deterministic Policy Rules. Owned by Member 2 (Minh Đức).
 """
 import pytest
+
 from src.contracts.messages import OrderSellerFacts, PaymentFacts, DeliveryFacts
-from src.policy_rules import evaluate_policy, round_money
+from src.policy_rules import evaluate_policy, is_payment_reconciled, round_money
 
 
 def test_round_money():
     assert round_money(10.555) == 10.56
     assert round_money(10.554) == 10.55
     assert round_money(0.0) == 0.0
+
+
+def test_payment_reconciliation_uses_inclusive_ten_cent_tolerance():
+    assert is_payment_reconciled(120.10, 100.0, 20.0) is True
+    assert is_payment_reconciled(119.90, 100.0, 20.0) is True
+    assert is_payment_reconciled(120.11, 100.0, 20.0) is False
 
 
 def test_policy_canceled_order_paid():
@@ -63,6 +70,33 @@ def test_policy_late_delivery_seller():
     assert res["resolution_actions"] == ["refund_freight"]
 
 
+def test_policy_selects_the_actual_late_seller():
+    order_seller = OrderSellerFacts(
+        order_id="o3-multi",
+        order_status="delivered",
+        sellers=[
+            {"seller_id": "seller_on_time", "seller_late_handoff": False},
+            {"seller_id": "seller_late", "seller_late_handoff": True},
+        ],
+        item_total_brl=100.0,
+        freight_total_brl=20.0,
+        seller_late_handoff=True,
+    )
+    payment = PaymentFacts(
+        order_id="o3-multi",
+        payment_rows=[{}],
+        payment_total_brl=120.0,
+        payment_count=1,
+    )
+    delivery = DeliveryFacts(order_id="o3-multi", delivered_late=True)
+
+    result = evaluate_policy(order_seller, payment, delivery)
+
+    assert result["responsible_parties"] == [
+        {"party_type": "seller", "party_id": "seller_late"}
+    ]
+
+
 def test_policy_late_delivery_logistics():
     order_seller = OrderSellerFacts(
         order_id="o4",
@@ -113,3 +147,28 @@ def test_policy_unsupported_late_claim():
     assert res["recommended_refund_brl"] == 0.0
     assert res["responsible_parties"] == []
     assert res["resolution_actions"] == ["reject_late_refund"]
+
+
+@pytest.mark.parametrize(
+    ("payment_total", "delivery"),
+    [
+        (119.0, DeliveryFacts(order_id="o7", delivered_within_estimate=True)),
+        (120.0, DeliveryFacts(order_id="o7")),
+    ],
+)
+def test_policy_rejects_facts_that_match_no_rule(payment_total, delivery):
+    order_seller = OrderSellerFacts(
+        order_id="o7",
+        order_status="delivered",
+        item_total_brl=100.0,
+        freight_total_brl=20.0,
+    )
+    payment = PaymentFacts(
+        order_id="o7",
+        payment_rows=[{}],
+        payment_total_brl=payment_total,
+        payment_count=1,
+    )
+
+    with pytest.raises(ValueError, match="No EC_POLICY_V1 rule matched"):
+        evaluate_policy(order_seller, payment, delivery)
