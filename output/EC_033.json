@@ -1,0 +1,39 @@
+{
+  "case_id": "EC_033",
+  "assessment": {
+    "primary_issue": "unsupported_late_claim",
+    "case_status": "no_action",
+    "confidence": 1.0
+  },
+  "affected_entities": {
+    "order_ids": [
+      "a5c8f3a11dcb9bd9b0acdfb8101dfdc8"
+    ],
+    "item_ids": [],
+    "seller_ids": [],
+    "payment_ids": []
+  },
+  "root_cause_analysis": {
+    "ranked_causes": [
+      {
+        "cause_code": "DELIVERY_WITHIN_ESTIMATE",
+        "rank": 1
+      }
+    ],
+    "responsible_parties": []
+  },
+  "evidence_ids": [
+    "order:a5c8f3a11dcb9bd9b0acdfb8101dfdc8",
+    "policy:DELIVERY_WITHIN_ESTIMATE"
+  ],
+  "financial_resolution": {
+    "currency": "BRL",
+    "item_total_brl": 0.0,
+    "freight_total_brl": 0.0,
+    "payment_total_brl": 0.0,
+    "recommended_refund_brl": 0.0
+  },
+  "resolution_actions": [
+    "reject_late_refund"
+  ]
+}
