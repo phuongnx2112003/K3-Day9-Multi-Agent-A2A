@@ -2,20 +2,48 @@
 Policy Agent. Owned by Member 2 (Minh Đức).
 Evaluates PolicyRequest against EC_POLICY_V1 policy rules and formats ResolutionDraft.
 """
-from typing import List, Dict, Any
+import asyncio
+from typing import Any, Callable, Dict, List, Optional
+
 from src.contracts.messages import PolicyRequest, ResolutionDraft
+from src.policy_prompt import PolicyClassification, classify_policy_with_llm
 from src.policy_rules import evaluate_policy, round_money
 
 
 class PolicyAgent:
+    def __init__(
+        self,
+        use_llm: bool = False,
+        llm_classifier: Optional[Callable[[PolicyRequest], PolicyClassification]] = None,
+    ):
+        self.use_llm = use_llm
+        self.llm_classifier = llm_classifier or classify_policy_with_llm
+        self.last_decision_source = "deterministic"
+        self.last_llm_error: Optional[str] = None
+
     async def process(self, request: PolicyRequest) -> ResolutionDraft:
         order_id = request.order_id
         order_seller = request.order_seller_facts
         payment = request.payment_facts
         delivery = request.delivery_facts
 
-        # 1. Evaluate policy rules
+        # Deterministic policy remains the source of truth and validates LLM output.
         decision = evaluate_policy(order_seller, payment, delivery)
+        self.last_decision_source = "deterministic"
+        self.last_llm_error = None
+        if self.use_llm:
+            try:
+                classification = await asyncio.to_thread(self.llm_classifier, request)
+                mismatch = _classification_mismatch(classification, decision)
+                if mismatch:
+                    self.last_decision_source = "deterministic_fallback"
+                    self.last_llm_error = mismatch
+                else:
+                    self.last_decision_source = "llm_verified"
+                    decision = _merge_verified_classification(decision, classification)
+            except Exception as exc:
+                self.last_decision_source = "deterministic_fallback"
+                self.last_llm_error = f"{type(exc).__name__}: {exc}"
 
         # 2. Extract affected entity IDs (capped at max 5 each)
         order_ids = [order_id]
@@ -100,3 +128,51 @@ class PolicyAgent:
             recommended_refund_brl=recommended_refund_brl,
             resolution_actions=decision["resolution_actions"][:5]
         )
+
+
+def _classification_mismatch(
+    classification: PolicyClassification, expected: Dict[str, Any]
+) -> Optional[str]:
+    parties = expected["responsible_parties"]
+    expected_party_type = parties[0]["party_type"] if parties else None
+    expected_party_id = parties[0]["party_id"] if parties else None
+    checks = {
+        "primary_issue": (classification.primary_issue, expected["primary_issue"]),
+        "root_cause_code": (
+            classification.root_cause_code,
+            expected["root_cause_code"],
+        ),
+        "case_status": (classification.case_status, expected["case_status"]),
+        "responsible_party_type": (
+            classification.responsible_party_type,
+            expected_party_type,
+        ),
+        "responsible_party_id": (
+            classification.responsible_party_id,
+            expected_party_id,
+        ),
+        "resolution_action": (
+            classification.resolution_action,
+            expected["resolution_actions"][0],
+        ),
+    }
+    mismatches = [
+        f"{name}: got {actual!r}, expected {wanted!r}"
+        for name, (actual, wanted) in checks.items()
+        if actual != wanted
+    ]
+    return "; ".join(mismatches) if mismatches else None
+
+
+def _merge_verified_classification(
+    decision: Dict[str, Any], classification: PolicyClassification
+) -> Dict[str, Any]:
+    """Use LLM categorical fields only after they match deterministic policy."""
+    merged = dict(decision)
+    merged.update(
+        primary_issue=classification.primary_issue,
+        root_cause_code=classification.root_cause_code,
+        case_status=classification.case_status,
+        resolution_actions=[classification.resolution_action],
+    )
+    return merged

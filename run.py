@@ -4,6 +4,7 @@ Processes EC_001.json through EC_050.json, writes verified outputs, and packages
 """
 import asyncio
 import json
+import os
 import uuid
 import zipfile
 from pathlib import Path
@@ -53,7 +54,8 @@ async def main():
     order_seller = OrderSellerAgent(dal)
     payment = PaymentAgent(dal)
     delivery = DeliveryAgent(dal)
-    policy = PolicyAgent()
+    use_llm = bool(os.getenv("OPENAI_API_KEY"))
+    policy = PolicyAgent(use_llm=use_llm)
     verifier = VerifierAgent(dal)
 
     coordinator = CoordinatorAgent(order_seller, payment, delivery, policy, verifier)
@@ -61,7 +63,10 @@ async def main():
     input_files = sorted(list(INPUT_DIR.glob("EC_*.json")))
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    print(f"Starting batch run {run_id} for {len(input_files)} cases...")
+    print(
+        f"Starting batch run {run_id} for {len(input_files)} cases "
+        f"(LLM policy classification: {'enabled' if use_llm else 'disabled'})..."
+    )
     success_count = 0
     failed_cases = []
 
@@ -96,7 +101,7 @@ async def main():
         print(f"Failed cases list: {failed_cases}")
 
     if success_count == len(input_files):
-        zip_path = BASE_DIR / "submission_output.zip"
+        zip_path = BASE_DIR / "output.zip"
         total_zipped = create_submission_zip(OUTPUT_DIR, zip_path)
         print(f"✅ Successfully created submission zip at '{zip_path}' containing {total_zipped} JSON files.")
 

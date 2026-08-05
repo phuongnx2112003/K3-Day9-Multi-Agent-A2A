@@ -75,7 +75,20 @@ class CoordinatorAgent:
         draft = await self.policy.process(pol_req)
         pol_duration_ms = int((time.time() - t_pol) * 1000)
 
-        log_event(run_id, trace_id, case_id, "agent_decided", "policy_agent", duration_ms=pol_duration_ms, output_summary={"primary_issue": draft.primary_issue, "refund": draft.recommended_refund_brl})
+        log_event(
+            run_id,
+            trace_id,
+            case_id,
+            "agent_decided",
+            "policy_agent",
+            duration_ms=pol_duration_ms,
+            output_summary={
+                "primary_issue": draft.primary_issue,
+                "refund": draft.recommended_refund_brl,
+                "decision_source": self.policy.last_decision_source,
+                "llm_error": self.policy.last_llm_error,
+            },
+        )
 
         # 3. Verification Call
         ver_req = VerificationRequest(

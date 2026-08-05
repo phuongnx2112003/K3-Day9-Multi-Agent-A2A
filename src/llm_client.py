@@ -1,14 +1,16 @@
 import os
-from typing import Optional
+from typing import Optional, TypeVar
 
 from dotenv import load_dotenv
 from openai import OpenAI
+from pydantic import BaseModel
 
 from src.settings import MODEL_NAME
 
 load_dotenv()
 
 _openai_client: Optional[OpenAI] = None
+StructuredResponse = TypeVar("StructuredResponse", bound=BaseModel)
 
 
 def get_openai_client() -> OpenAI:
@@ -59,3 +61,27 @@ def call_llm(
     )
 
     return chat_completion.choices[0].message.content or ""
+
+
+def call_llm_structured(
+    prompt: str,
+    response_model: type[StructuredResponse],
+    system_prompt: str,
+    temperature: float = 0.0,
+) -> StructuredResponse:
+    """Call OpenAI with Structured Outputs and return a validated Pydantic model."""
+    client = get_openai_client()
+    completion = client.chat.completions.parse(
+        model=MODEL_NAME,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt},
+        ],
+        temperature=temperature,
+        response_format=response_model,
+    )
+    message = completion.choices[0].message
+    if message.parsed is None:
+        refusal = getattr(message, "refusal", None)
+        raise ValueError(f"OpenAI returned no structured result: {refusal or 'unknown'}")
+    return message.parsed
