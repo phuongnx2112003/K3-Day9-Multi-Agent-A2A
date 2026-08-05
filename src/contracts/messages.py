@@ -3,6 +3,15 @@ Message envelope and inter-agent handoff contracts.
 """
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
+from src.contracts.output_schema import (
+    CaseOutput,
+    Assessment,
+    AffectedEntities,
+    RootCauseAnalysis,
+    CauseItem,
+    ResponsibleParty,
+    FinancialResolution
+)
 
 
 class MessageEnvelope(BaseModel):
@@ -83,6 +92,36 @@ class ResolutionDraft(BaseModel):
     payment_total_brl: float
     recommended_refund_brl: float
     resolution_actions: List[str]
+
+    def to_case_output(self) -> CaseOutput:
+        """Helper to convert flat ResolutionDraft to nested CaseOutput schema."""
+        return CaseOutput(
+            case_id=self.case_id,
+            assessment=Assessment(
+                primary_issue=self.primary_issue,
+                case_status=self.case_status,
+                confidence=self.confidence
+            ),
+            affected_entities=AffectedEntities(
+                order_ids=self.order_ids,
+                item_ids=self.item_ids,
+                seller_ids=self.seller_ids,
+                payment_ids=self.payment_ids
+            ),
+            root_cause_analysis=RootCauseAnalysis(
+                ranked_causes=[CauseItem(**rc) for rc in self.ranked_causes],
+                responsible_parties=[ResponsibleParty(**rp) for rp in self.responsible_parties]
+            ),
+            evidence_ids=self.evidence_ids,
+            financial_resolution=FinancialResolution(
+                currency=self.currency,
+                item_total_brl=self.item_total_brl,
+                freight_total_brl=self.freight_total_brl,
+                payment_total_brl=self.payment_total_brl,
+                recommended_refund_brl=self.recommended_refund_brl
+            ),
+            resolution_actions=self.resolution_actions
+        )
 
 
 class VerificationRequest(BaseModel):
