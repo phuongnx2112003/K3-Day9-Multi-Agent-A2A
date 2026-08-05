@@ -9,9 +9,15 @@
     "order_ids": [
       "5fba7c57daf631028d2a584c52799e24"
     ],
-    "item_ids": [],
-    "seller_ids": [],
-    "payment_ids": []
+    "item_ids": [
+      "5fba7c57daf631028d2a584c52799e24:1"
+    ],
+    "seller_ids": [
+      "1f50f920176fa81dab994f9023523100"
+    ],
+    "payment_ids": [
+      "5fba7c57daf631028d2a584c52799e24:1"
+    ]
   },
   "root_cause_analysis": {
     "ranked_causes": [
@@ -24,13 +30,16 @@
   },
   "evidence_ids": [
     "order:5fba7c57daf631028d2a584c52799e24",
+    "item:5fba7c57daf631028d2a584c52799e24:1",
+    "payment:5fba7c57daf631028d2a584c52799e24:1",
+    "seller:1f50f920176fa81dab994f9023523100",
     "policy:DELIVERY_WITHIN_ESTIMATE"
   ],
   "financial_resolution": {
     "currency": "BRL",
-    "item_total_brl": 0.0,
-    "freight_total_brl": 0.0,
-    "payment_total_brl": 0.0,
+    "item_total_brl": 59.9,
+    "freight_total_brl": 13.44,
+    "payment_total_brl": 73.34,
     "recommended_refund_brl": 0.0
   },
   "resolution_actions": [

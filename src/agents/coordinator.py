@@ -3,6 +3,7 @@ Coordinator Agent. Owned by Member 3.
 Orchestrates parallel investigation, facts merging, policy call, and verification gate.
 """
 import asyncio
+import time
 from typing import Optional, Dict, Any
 from src.contracts.messages import (
     InvestigationRequest,
@@ -39,7 +40,7 @@ class CoordinatorAgent:
         opened_at = case_input["opened_at"]
         message = case_input["customer_request"]["message"]
 
-        log_event(run_id, trace_id, case_id, "case_started", "coordinator")
+        log_event(run_id, trace_id, case_id, "case_started", "coordinator", input_refs=[case_id])
 
         inv_req = InvestigationRequest(
             case_id=case_id,
@@ -48,12 +49,18 @@ class CoordinatorAgent:
             customer_request_message=message
         )
 
-        # 1. Parallel Investigation Fan-out
+        # 1. Parallel Investigation Fan-out with per-agent logging
+        t0 = time.time()
         order_seller_facts, payment_facts, delivery_facts = await asyncio.gather(
             self.order_seller.process(inv_req),
             self.payment.process(inv_req),
             self.delivery.process(inv_req)
         )
+        duration_ms = int((time.time() - t0) * 1000)
+
+        log_event(run_id, trace_id, case_id, "agent_investigated", "order_seller_agent", duration_ms=duration_ms, output_summary={"order_status": order_seller_facts.order_status, "item_total": order_seller_facts.item_total_brl})
+        log_event(run_id, trace_id, case_id, "agent_investigated", "payment_agent", duration_ms=duration_ms, output_summary={"payment_total": payment_facts.payment_total_brl, "payment_count": payment_facts.payment_count})
+        log_event(run_id, trace_id, case_id, "agent_investigated", "delivery_agent", duration_ms=duration_ms, output_summary={"delivered_late": delivery_facts.delivered_late})
         log_event(run_id, trace_id, case_id, "facts_merged", "coordinator")
 
         # 2. Policy Call
@@ -64,8 +71,11 @@ class CoordinatorAgent:
             payment_facts=payment_facts,
             delivery_facts=delivery_facts
         )
+        t_pol = time.time()
         draft = await self.policy.process(pol_req)
-        log_event(run_id, trace_id, case_id, "policy_decided", "coordinator")
+        pol_duration_ms = int((time.time() - t_pol) * 1000)
+
+        log_event(run_id, trace_id, case_id, "agent_decided", "policy_agent", duration_ms=pol_duration_ms, output_summary={"primary_issue": draft.primary_issue, "refund": draft.recommended_refund_brl})
 
         # 3. Verification Call
         ver_req = VerificationRequest(
@@ -75,10 +85,14 @@ class CoordinatorAgent:
             payment_facts=payment_facts,
             delivery_facts=delivery_facts
         )
+        t_ver = time.time()
         ver_res = await self.verifier.verify(ver_req)
-        log_event(run_id, trace_id, case_id, "verification_completed", "coordinator")
+        ver_duration_ms = int((time.time() - t_ver) * 1000)
+
+        log_event(run_id, trace_id, case_id, "agent_verified", "verifier_agent", duration_ms=ver_duration_ms, status="success" if ver_res.valid else "error", output_summary={"valid": ver_res.valid, "errors": ver_res.errors, "warnings": ver_res.warnings})
 
         if ver_res.valid:
+            log_event(run_id, trace_id, case_id, "case_completed", "coordinator", status="success")
             return draft
         else:
             log_event(run_id, trace_id, case_id, "case_failed", "coordinator", status="error", error="; ".join(ver_res.errors))

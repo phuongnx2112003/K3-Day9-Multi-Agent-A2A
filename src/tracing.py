@@ -2,11 +2,37 @@
 Tracing and logging infrastructure.
 """
 import json
-import time
+import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
-from src.settings import TRACE_FILE, METADATA_FILE, MODEL_NAME, PARAMETER_SIZE, FRAMEWORK, POLICY_VERSION, SCHEMA_VERSION
+from src.settings import (
+    TRACE_FILE,
+    METADATA_FILE,
+    MODEL_NAME,
+    PARAMETER_SIZE,
+    FRAMEWORK,
+    POLICY_VERSION,
+    SCHEMA_VERSION,
+)
+
+
+def get_git_commit_sha() -> str:
+    """Dynamically retrieve current git commit SHA."""
+    try:
+        res = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=5,
+        )
+        sha = res.stdout.strip()
+        if sha:
+            return sha
+    except Exception:
+        pass
+    return "unknown"
 
 
 def init_trace_file() -> None:
@@ -46,8 +72,9 @@ def log_event(
         f.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
-def write_metadata(commit_sha: str = "main") -> None:
-    """Write system metadata.json."""
+def write_metadata(commit_sha: Optional[str] = None) -> None:
+    """Write system metadata.json with dynamic commit SHA."""
+    actual_sha = commit_sha or get_git_commit_sha()
     metadata = {
         "model_name": MODEL_NAME,
         "parameter_size": PARAMETER_SIZE,
@@ -55,7 +82,7 @@ def write_metadata(commit_sha: str = "main") -> None:
         "policy_version": POLICY_VERSION,
         "schema_version": SCHEMA_VERSION,
         "executed_at": datetime.now(timezone.utc).isoformat(),
-        "commit_sha": commit_sha,
+        "commit_sha": actual_sha,
     }
     METADATA_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(METADATA_FILE, "w", encoding="utf-8") as f:

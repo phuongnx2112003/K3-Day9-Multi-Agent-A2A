@@ -1,9 +1,9 @@
 {
-  "model_name": "qwen2.5:7b-instruct",
-  "parameter_size": "7B",
+  "model_name": "llama-3.1-8b-instant",
+  "parameter_size": "8B",
   "framework": "Custom Multi-Agent (Python)",
   "policy_version": "EC_POLICY_V1",
   "schema_version": "1.0",
-  "executed_at": "2026-08-05T03:31:38.284417+00:00",
-  "commit_sha": "main"
+  "executed_at": "2026-08-05T04:05:10.354499+00:00",
+  "commit_sha": "2ec128a5faa9a165f692099f49b6bae09bbdd7c5"
 }

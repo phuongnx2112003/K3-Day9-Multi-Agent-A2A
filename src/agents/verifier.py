@@ -2,7 +2,6 @@
 Verifier Agent. Owned by Member 3.
 Acts as an independent quality gate before writing final case output.
 """
-import re
 from datetime import datetime, timezone
 from decimal import Decimal, ROUND_HALF_UP
 from typing import List, Optional
@@ -56,9 +55,41 @@ class VerifierAgent:
 
         # Policy evidence ID check
         if draft.ranked_causes:
-            expected_policy_ev = f"policy:{draft.ranked_causes[0]['cause_code']}"
-            if expected_policy_ev not in draft.evidence_ids:
-                warnings.append(f"Evidence list missing matching policy evidence ID '{expected_policy_ev}'")
+            cause_code = draft.ranked_causes[0].get("cause_code", "")
+            expected_policy_ev = f"policy:{cause_code}"
+            if expected_policy_ev not in draft.evidence_ids and f"policy:{draft.primary_issue}" not in draft.evidence_ids:
+                warnings.append(f"Evidence list missing matching policy evidence ID for cause '{cause_code}'")
+
+        # Evidence grounding validation against facts
+        fact_order_id = request.order_seller_facts.order_id if request.order_seller_facts else None
+        fact_items = set()
+        fact_sellers = set()
+        if request.order_seller_facts:
+            if request.order_seller_facts.items:
+                for it in request.order_seller_facts.items:
+                    if isinstance(it, dict):
+                        if "order_item_id" in it:
+                            fact_items.add(str(it["order_item_id"]))
+                        if "item_id" in it:
+                            fact_items.add(str(it["item_id"]))
+                        if "seller_id" in it:
+                            fact_sellers.add(str(it["seller_id"]))
+            if request.order_seller_facts.sellers:
+                for s in request.order_seller_facts.sellers:
+                    if isinstance(s, dict) and "seller_id" in s:
+                        fact_sellers.add(str(s["seller_id"]))
+                    elif isinstance(s, str):
+                        fact_sellers.add(s)
+
+        for ev_id in draft.evidence_ids:
+            if ev_id.startswith("order:") and fact_order_id:
+                ev_order = ev_id.split("order:", 1)[1]
+                if ev_order != fact_order_id:
+                    warnings.append(f"Evidence order ID '{ev_order}' does not match order in facts '{fact_order_id}'")
+            elif ev_id.startswith("seller:") and fact_sellers:
+                ev_seller = ev_id.split("seller:", 1)[1]
+                if ev_seller not in fact_sellers:
+                    warnings.append(f"Evidence seller ID '{ev_seller}' not found in seller facts {fact_sellers}")
 
         # 5. Financial Decimal Totals Verification
         item_total = round_money_dec(draft.item_total_brl)
