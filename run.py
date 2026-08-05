@@ -19,16 +19,15 @@ from src.agents.coordinator import CoordinatorAgent
 
 
 def create_submission_zip(output_dir: Path, zip_path: Path) -> int:
-    """Pack exactly 50 EC_xxx.json files into submission zip without extra files or directories."""
+    """Pack exactly 50 output/EC_xxx.json files into submission zip without extra files."""
     json_files = sorted(list(output_dir.glob("EC_*.json")))
     if len(json_files) != 50:
         raise ValueError(f"Expected exactly 50 output files, found {len(json_files)}")
 
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
         for fpath in json_files:
-            # Ensure no directories or temporary files are included
             if fpath.is_file() and not fpath.name.endswith(".tmp"):
-                zf.write(fpath, arcname=fpath.name)
+                zf.write(fpath, arcname=f"output/{fpath.name}")
 
     # Verification: check zipped contents
     with zipfile.ZipFile(zip_path, "r") as zf:
@@ -36,7 +35,7 @@ def create_submission_zip(output_dir: Path, zip_path: Path) -> int:
         if len(namelist) != 50:
             raise ValueError(f"Zip validation failed: expected 50 entries, got {len(namelist)}")
         for name in namelist:
-            if not (name.startswith("EC_") and name.endswith(".json")):
+            if not (name.startswith("output/EC_") and name.endswith(".json")):
                 raise ValueError(f"Zip contains unexpected file: '{name}'")
 
     return len(json_files)
@@ -98,7 +97,7 @@ async def main():
     if success_count == len(input_files):
         zip_path = BASE_DIR / "submission_output.zip"
         total_zipped = create_submission_zip(OUTPUT_DIR, zip_path)
-        print(f"✅ Successfully created submission zip at '{zip_path}' containing {total_zipped} JSON files.")
+        print(f"Successfully created submission zip at '{zip_path}' containing {total_zipped} JSON files.")
 
 
 if __name__ == "__main__":
