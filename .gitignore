@@ -1,3 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+output/*.json
+!output/.gitkeep
+logging/trace.jsonl
 # Local environment and secrets
 .venv/
 .env
