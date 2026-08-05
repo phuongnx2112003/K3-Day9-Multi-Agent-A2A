@@ -2,15 +2,11 @@
   "model_name": "gpt-4o-mini",
   "parameter_size": "Not publicly disclosed",
   "provider": "OpenAI API",
+  "llm_policy_enabled": true,
   "framework": "Custom Multi-Agent (Python)",
   "runtime": "Python 3.12.3",
   "policy_version": "EC_POLICY_V1",
   "schema_version": "1.0",
-<<<<<<< Updated upstream
-  "executed_at": "2026-08-05T04:27:18.183011+00:00",
-  "commit_sha": "dc0c559eb647a54c8a2b99d5d69ae2bf9d221f98"
-=======
-  "executed_at": "2026-08-05T04:28:27.465409+00:00",
-  "commit_sha": "285379559877140ad1e6df52f7b715671a528054"
->>>>>>> Stashed changes
+  "executed_at": "2026-08-05T05:01:31.719832+00:00",
+  "commit_sha": "ab9a9c2a294eccfa96fd64ec6d484508b662dd92"
 }

@@ -59,6 +59,42 @@ def test_call_llm_uses_gpt_4o_mini(monkeypatch):
     )
 
 
+def test_call_llm_structured_uses_pydantic_schema(monkeypatch):
+    from src.policy_prompt import PolicyClassification
+
+    parsed = PolicyClassification(
+        primary_issue="late_delivery_seller",
+        root_cause_code="SELLER_HANDOFF_AFTER_LIMIT",
+        case_status="action_required",
+        responsible_party_type="seller",
+        responsible_party_id="seller-1",
+        resolution_action="refund_freight",
+        rationale="delivered_late and seller_late_handoff are true",
+    )
+    client = Mock()
+    client.chat.completions.parse.return_value = SimpleNamespace(
+        choices=[SimpleNamespace(message=SimpleNamespace(parsed=parsed, refusal=None))]
+    )
+    monkeypatch.setattr(llm_client, "get_openai_client", lambda: client)
+
+    result = llm_client.call_llm_structured(
+        prompt="facts",
+        response_model=PolicyClassification,
+        system_prompt="rules",
+    )
+
+    assert result == parsed
+    client.chat.completions.parse.assert_called_once_with(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "rules"},
+            {"role": "user", "content": "facts"},
+        ],
+        temperature=0.0,
+        response_format=PolicyClassification,
+    )
+
+
 @pytest.mark.skipif(
     not os.getenv("OPENAI_API_KEY"),
     reason="Yêu cầu OPENAI_API_KEY để chạy live API test",
